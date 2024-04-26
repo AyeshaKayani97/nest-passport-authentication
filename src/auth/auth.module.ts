@@ -17,7 +17,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigMo
       inject: [ConfigService], // Inject ConfigService
       useFactory: (config: ConfigService) => {
         return {
-          secret: config.get<string>('JWT_SECRET'), // Fix typo and use get method to fetch value from environment variables
+          secret: config.get<string>('JWT_SECRETE'), // Fix typo and use get method to fetch value from environment variables
           signOptions: {
             expiresIn: config.get<string>('JWT_EXPIRE'), // Fix typo and use get method
           },

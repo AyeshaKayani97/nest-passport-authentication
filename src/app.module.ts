@@ -9,6 +9,9 @@ import { User, UserSchema } from './auth/schemas/user.schema';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+
+
 
 @Module({
   imports: [
@@ -30,6 +33,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             expiresIn: config.get<string>('JWT_EXPIRE'),
           },
         };
+      },
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_USERNAME,
+          pass: process.env.EMAIL_PASSWORD,
+        },
       },
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
