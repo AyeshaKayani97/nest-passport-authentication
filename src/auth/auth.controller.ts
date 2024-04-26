@@ -24,7 +24,7 @@ export class AuthController {
 
 
     }
-    @Post("/reset-password")
+    @Post("/forgot-password")
     resetPassword( @Body() forgotPasswordDTO:ForgotPasswordDTO):Promise<{message:string}>{
         return this.authService.forgotPassword(forgotPasswordDTO);
 

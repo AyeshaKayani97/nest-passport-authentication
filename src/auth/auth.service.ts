@@ -11,6 +11,7 @@ import randomstring from "randomstring";
 import  nodemailer from "nodemailer";
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ResetPasswordDTO } from './dto/reset-password.dto';
 
 
 @Injectable()
@@ -83,18 +84,36 @@ export class AuthService {
 
 
     }
-    async forgotPassword( forgotPasswordDTO:ForgotPasswordDTO ):Promise<{message:string}>{
+    async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO) {
         const { email } = forgotPasswordDTO;
-        const emailExist = await this.userModel.findOne({email})
-        if(emailExist){
-            const randomString = randomstring.generate() 
+        const user = await this.userModel.findOne({ email });
+        
+        if (user) {
+            const randomString = randomstring.generate(); 
             await this.userModel.updateOne({ email: email }, { $set: { token: randomString } });
-            await this.resetPasswordEmail(user.name, user.email, randomString);
-            return {
-                "message":"Reset password email has been sent. Please check your inbox."
-            }
-
+            this.resetPasswordEmail(user.name, user.email, randomString);
+            
+            // Success message after sending the email
+            return {"message":"Reset password email has been sent. Please check your inbox."};
+        } else {
+            throw new UnauthorizedException("This Email Does Not Exist");
         }
-        throw new  UnauthorizedException("This Email Does Not Exist")
     }
+    
+    async resetPassword(resetPasswordDTO: ResetPasswordDTO) {
+        const { token, password } = resetPasswordDTO;
+        const tokenData = await this.userModel.findOne({ token: token });
+    
+        if (tokenData) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await this.userModel.findByIdAndUpdate(tokenData._id, { $set: { password: hashedPassword, token: "" } }, { new: true });
+            
+            return {
+                message: "User Password has been reset"
+            };
+        } else {
+            throw new UnauthorizedException("This link has expired");
+        }
+    }
+    
 }
