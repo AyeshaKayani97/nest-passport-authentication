@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { User, UserSchema } from './schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule and ConfigService
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -22,6 +23,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigMo
             expiresIn: config.get<string>('JWT_EXPIRE'), // Fix typo and use get method
           },
         };
+      },
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: 587, // or 465 for SSL
+        secure: false, // true for SSL, false for TLS/STARTTLS
+        auth: {
+          user: process.env.EMAIL_USERNAME,
+          pass: process.env.EMAIL_PASSWORD,
+        },
       },
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), // Add comma here

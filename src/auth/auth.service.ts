@@ -12,6 +12,7 @@ import  nodemailer from "nodemailer";
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 
 @Injectable()
@@ -62,19 +63,9 @@ export class AuthService {
 
     }
 
-    async resetPasswordEmail(name, email, token){
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.email",
-            port: 587,
-            secure: false, // Use `true` for port 465, `false` for all other ports
-            auth: {
-              user:this.configService.get<string>("SMTP_USERNAME"),
-              pass: this.configService.get<string>("SMTP_PASSWORD"),
-            },
-
-        });
+    async forgotPasswordEmail(name, email, token){
         const mailOptions = {
-            from:this.configService.get<string>("SMTP_USERNAME"),
+            from:this.configService.get<string>("EMAIL_USERNAME"),
             to: email, // list of receivers
             subject: "For reset password ✔", 
             // text: "Hello world?", 
@@ -84,17 +75,21 @@ export class AuthService {
 
 
     }
+
+    
     async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO) {
         const { email } = forgotPasswordDTO;
         const user = await this.userModel.findOne({ email });
         
         if (user) {
-            const randomString = randomstring.generate(); 
-            await this.userModel.updateOne({ email: email }, { $set: { token: randomString } });
-            this.resetPasswordEmail(user.name, user.email, randomString);
+            const randomToken = uuidv4();
+            await this.userModel.updateOne({ email: email }, { $set: { token: randomToken } });
+            this.forgotPasswordEmail(user.name, user.email, randomToken);
             
             // Success message after sending the email
-            return {"message":"Reset password email has been sent. Please check your inbox."};
+            return {
+                "message":"Reset password email has been sent. Please check your inbox."
+            };
         } else {
             throw new UnauthorizedException("This Email Does Not Exist");
         }
