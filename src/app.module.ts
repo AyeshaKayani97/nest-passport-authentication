@@ -10,6 +10,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { TodosModule } from './todos/todos.module';
+import { TodosController } from './todos/todos.controller';
+import { TodosService } from './todos/todos.service';
+import { AuthController } from './auth/auth.controller';
+import { Todo, TodoSchema } from './todos/schemas/Todo.schema';
+
 
 
 
@@ -47,10 +53,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
       },
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: Todo.name, schema: TodoSchema }]),
     AuthModule,
     UsersModule,
+    TodosModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, AuthService],
+  controllers: [AppController, TodosController, AuthController],
+  providers: [AppService, AuthService, TodosService],
 })
 export class AppModule {}

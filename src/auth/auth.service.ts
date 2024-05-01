@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Body, Injectable, Param, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {  Model } from 'mongoose';
 import { User } from './schemas/user.schema';
@@ -7,8 +7,6 @@ import { LogInDTO } from './dto/signin.dto';
 import * as bcrypt from "bcryptjs";
 import { JwtService } from '@nestjs/jwt';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
-import randomstring from "randomstring";
-import  nodemailer from "nodemailer";
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
@@ -71,7 +69,7 @@ export class AuthService {
             // text: "Hello world?", 
             html: 'Hi ' +name+ ', please copy the link <a href="http://127.0.0.1:3000/auth/reset-password?token= '+token+'" >reset password</a> ', 
         }
-        this.mailService.sendMail(mailOptions);
+        await this.mailService.sendMail(mailOptions);
 
 
     }
@@ -84,7 +82,7 @@ export class AuthService {
         if (user) {
             const randomToken = uuidv4();
             await this.userModel.updateOne({ email: email }, { $set: { token: randomToken } });
-            this.forgotPasswordEmail(user.name, user.email, randomToken);
+            await this.forgotPasswordEmail(user.name, user.email, randomToken);
             
             // Success message after sending the email
             return {
@@ -94,7 +92,10 @@ export class AuthService {
             throw new UnauthorizedException("This Email Does Not Exist");
         }
     }
-    
+
+    // reset password 
+
+
     async resetPassword(resetPasswordDTO: ResetPasswordDTO) {
         const { token, password } = resetPasswordDTO;
         const tokenData = await this.userModel.findOne({ token: token });
@@ -110,5 +111,10 @@ export class AuthService {
             throw new UnauthorizedException("This link has expired");
         }
     }
+    
+   
+    // protecting routes from unauthenticated user 
+
+
     
 }

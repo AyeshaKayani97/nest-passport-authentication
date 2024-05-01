@@ -7,6 +7,7 @@ import { User, UserSchema } from './schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigModule and ConfigService
 import { MailerModule } from '@nestjs-modules/mailer';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
       inject: [ConfigService], // Inject ConfigService
       useFactory: (config: ConfigService) => {
         return {
-          secret: config.get<string>('JWT_SECRETE'), // Fix typo and use get method to fetch value from environment variables
+          secret: config.get<string>('JWT_SECRET'), // Fix typo and use get method to fetch value from environment variables
           signOptions: {
             expiresIn: config.get<string>('JWT_EXPIRE'), // Fix typo and use get method
           },
@@ -39,6 +40,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), // Add comma here
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
+  exports:[JwtStrategy, PassportModule]
 })
 export class AuthModule {}
