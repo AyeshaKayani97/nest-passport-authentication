@@ -1,16 +1,14 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
 import { LogInDTO } from './dto/signin.dto';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
-import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private usersSerice: UsersService,
   ) {
   }
 
@@ -22,31 +20,16 @@ export class AuthController {
   @Post('/login')
   logIn(@Body() loginDto: LogInDTO): Promise<{ token: string }> {
     return this.authService.login(loginDto);
-
-
   }
 
   @Post('/forgot-password')
   forgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO): Promise<{ message: string }> {
     return this.authService.forgotPassword(forgotPasswordDTO);
-
-
   }
 
-  @Get('/reset-password')
-  async showResetPasswordForm(
-    @Query('token') token: string,
-  ) {
-    // Render the reset password form or handle it as needed
-    return `Reset password form for token: ${token}`;
-  }
-
-
-  @Post('/rest-password')
+  @Post('/reset-password')
   resetPassword(@Body() resetPasswordDTO: ResetPasswordDTO) {
     return this.authService.resetPassword(resetPasswordDTO);
   }
-
-
 }
 
